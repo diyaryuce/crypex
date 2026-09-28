@@ -17,6 +17,23 @@ async function registerUser(email, password) {
     data: {
       email,
       passwordHash,
+
+      wallets: {
+        create: [
+          {
+            asset: "USD",
+            balance: 10000,
+          },
+          {
+            asset: "BTC",
+            balance: 0,
+          },
+          {
+            asset: "ETH",
+            balance: 0,
+          },
+        ],
+      },
     },
   });
 

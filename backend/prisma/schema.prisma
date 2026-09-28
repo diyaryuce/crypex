@@ -17,4 +17,18 @@ model User {
   email        String   @unique
   passwordHash String
   createdAt    DateTime @default(now())
+
+  wallets      Wallet[]
+}
+
+model Wallet {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  asset     String
+  balance   Decimal  @default(0) @db.Decimal(30, 10)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, asset])
 }
