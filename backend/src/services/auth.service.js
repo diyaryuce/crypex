@@ -1,5 +1,6 @@
 const argon2 = require("argon2");
 const prisma = require("../lib/prisma");
+const jwt = require("jsonwebtoken");
 
 async function registerUser(email, password) {
   const existingUser = await prisma.user.findUnique({
@@ -41,10 +42,17 @@ async function loginUser(email, password) {
     throw new Error("Invalid email or password");
   }
 
+  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+    expiresIn: "15m",
+  });
+
   return {
-    id: user.id,
-    email: user.email,
-    createdAt: user.createdAt,
+    user: {
+      id: user.id,
+      email: user.email,
+      createdAt: user.createdAt,
+    },
+    token,
   };
 }
 
