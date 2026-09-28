@@ -26,6 +26,29 @@ async function registerUser(email, password) {
   };
 }
 
+async function loginUser(email, password) {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new Error("Invalid email or password");
+  }
+
+  const passwordMatches = await argon2.verify(user.passwordHash, password);
+
+  if (!passwordMatches) {
+    throw new Error("Invalid email or password");
+  }
+
+  return {
+    id: user.id,
+    email: user.email,
+    createdAt: user.createdAt,
+  };
+}
+
 module.exports = {
   registerUser,
+  loginUser,
 };
