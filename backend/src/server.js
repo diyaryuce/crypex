@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
 const walletRoutes = require("./routes/wallet.routes");
 const transactionRoutes = require("./routes/transaction.routes");
+const orderRoutes = require("./routes/order.routes");
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/wallets", walletRoutes);
 app.use("/api/transactions", transactionRoutes);
+app.use("/api/orders", orderRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({
