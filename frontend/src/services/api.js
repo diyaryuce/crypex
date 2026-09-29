@@ -56,3 +56,45 @@ export async function getTransactions() {
 
   return data;
 }
+
+export async function buyCrypto(asset, amount) {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/orders/buy`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ asset, amount }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Buy failed");
+  }
+
+  return data;
+}
+
+export async function sellCrypto(asset, amount) {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/orders/sell`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ asset, amount }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Sell failed");
+  }
+
+  return data;
+}
