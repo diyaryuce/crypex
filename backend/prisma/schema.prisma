@@ -19,6 +19,7 @@ model User {
   createdAt    DateTime @default(now())
 
   wallets      Wallet[]
+  transactions Transaction[]
 }
 
 model Wallet {
@@ -31,4 +32,15 @@ model Wallet {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, asset])
+}
+
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String
+  asset     String
+  amount    Decimal  @db.Decimal(30, 10)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -28,21 +28,37 @@ router.post(
   async (req, res) => {
     const { asset, amount } = req.body;
 
-    const wallet = await prisma.wallet.update({
-      where: {
-        userId_asset: {
+    const result = await prisma.$transaction(async (tx) => {
+      const wallet = await tx.wallet.update({
+        where: {
+          userId_asset: {
+            userId: req.userId,
+            asset,
+          },
+        },
+        data: {
+          balance: {
+            increment: amount,
+          },
+        },
+      });
+
+      const transaction = await tx.transaction.create({
+        data: {
           userId: req.userId,
+          type: "DEPOSIT",
           asset,
+          amount,
         },
-      },
-      data: {
-        balance: {
-          increment: amount,
-        },
-      },
+      });
+
+      return {
+        wallet,
+        transaction,
+      };
     });
 
-    res.json(wallet);
+    res.json(result);
   },
 );
 
