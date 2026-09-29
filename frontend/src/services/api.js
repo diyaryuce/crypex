@@ -38,3 +38,21 @@ export async function getWallets() {
 
   return data;
 }
+
+export async function getTransactions() {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/transactions`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to load transactions");
+  }
+
+  return data;
+}
