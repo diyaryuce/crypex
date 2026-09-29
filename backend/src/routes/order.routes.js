@@ -80,4 +80,77 @@ router.post("/buy", requireAuth, validate(orderSchema), async (req, res) => {
   res.json(result);
 });
 
+router.post("/sell", requireAuth, validate(orderSchema), async (req, res) => {
+  const { asset, amount } = req.body;
+
+  const price = prices[asset];
+  const totalValue = price * amount;
+
+  const result = await prisma.$transaction(async (tx) => {
+    const cryptoWallet = await tx.wallet.findUnique({
+      where: {
+        userId_asset: {
+          userId: req.userId,
+          asset,
+        },
+      },
+    });
+
+    if (!cryptoWallet) {
+      throw new Error("Crypto wallet not found");
+    }
+
+    if (Number(cryptoWallet.balance) < amount) {
+      throw new Error("Insufficient crypto balance");
+    }
+
+    const updatedCrypto = await tx.wallet.update({
+      where: {
+        userId_asset: {
+          userId: req.userId,
+          asset,
+        },
+      },
+      data: {
+        balance: {
+          decrement: amount,
+        },
+      },
+    });
+
+    const updatedUsd = await tx.wallet.update({
+      where: {
+        userId_asset: {
+          userId: req.userId,
+          asset: "USD",
+        },
+      },
+      data: {
+        balance: {
+          increment: totalValue,
+        },
+      },
+    });
+
+    const transaction = await tx.transaction.create({
+      data: {
+        userId: req.userId,
+        type: "SELL",
+        asset,
+        amount,
+      },
+    });
+
+    return {
+      price,
+      totalValue,
+      usdWallet: updatedUsd,
+      cryptoWallet: updatedCrypto,
+      transaction,
+    };
+  });
+
+  res.json(result);
+});
+
 module.exports = router;
