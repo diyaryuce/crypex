@@ -1,9 +1,11 @@
+const { Prisma } = require("@prisma/client");
 const prisma = require("../lib/prisma");
 const prices = require("../config/prices");
 
 async function buyCrypto(userId, asset, amount) {
-  const price = prices[asset];
-  const totalCost = price * amount;
+  const price = new Prisma.Decimal(prices[asset]);
+  const amountDecimal = new Prisma.Decimal(amount);
+  const totalCost = price.mul(amountDecimal);
 
   const result = await prisma.$transaction(async (tx) => {
     const usdWallet = await tx.wallet.findUnique({
@@ -19,7 +21,7 @@ async function buyCrypto(userId, asset, amount) {
       throw new Error("USD wallet not found");
     }
 
-    if (Number(usdWallet.balance) < totalCost) {
+    if (usdWallet.balance.lt(totalCost)) {
       throw new Error("Insufficient USD balance");
     }
 
@@ -46,7 +48,7 @@ async function buyCrypto(userId, asset, amount) {
       },
       data: {
         balance: {
-          increment: amount,
+          increment: amountDecimal,
         },
       },
     });
@@ -73,8 +75,9 @@ async function buyCrypto(userId, asset, amount) {
 }
 
 async function sellCrypto(userId, asset, amount) {
-  const price = prices[asset];
-  const totalValue = price * amount;
+  const price = new Prisma.Decimal(prices[asset]);
+  const amountDecimal = new Prisma.Decimal(amount);
+  const totalValue = price.mul(amountDecimal);
 
   const result = await prisma.$transaction(async (tx) => {
     const cryptoWallet = await tx.wallet.findUnique({
@@ -90,7 +93,7 @@ async function sellCrypto(userId, asset, amount) {
       throw new Error("Crypto wallet not found");
     }
 
-    if (Number(cryptoWallet.balance) < amount) {
+    if (cryptoWallet.balance.lt(amountDecimal)) {
       throw new Error("Insufficient crypto balance");
     }
 
@@ -103,7 +106,7 @@ async function sellCrypto(userId, asset, amount) {
       },
       data: {
         balance: {
-          decrement: amount,
+          decrement: amountDecimal,
         },
       },
     });
