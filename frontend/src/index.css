@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+@utility emerald-gradient {
+  @apply bg-[radial-gradient(50.42%_92.5%_at_50.42%_7.5%,#6EE7B7_0%,#047857_100%)] bg-clip-text text-transparent;
+}
+
+body {
+  font-family: "Outfit", sans-serif;
+}
+
+button {
+  cursor: pointer;
+}
