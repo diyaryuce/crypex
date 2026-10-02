@@ -1,18 +1,21 @@
 export default function SidebarButton({
   icon: Icon,
   label,
-  selected,
+  selected = false,
   className,
+  onClick,
 }) {
   return (
     <button
+      type="button"
+      onClick={onClick}
       className={`
         group relative flex items-center overflow-hidden
         rounded-xl px-4 py-3 gap-3
         transition-colors duration-300
 
-        ${className}
         ${selected ? "text-white" : "hover:text-white text-[#54585f]"}
+        ${className}
       `}
     >
       <span
