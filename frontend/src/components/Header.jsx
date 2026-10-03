@@ -4,7 +4,7 @@ export default function Header({ user }) {
   return (
     <header
       className="
-        bg-[#161616] h-20 flex justify-end items-center sticky
+        bg-[#161616] h-16 flex justify-end items-center sticky
         p-4 pr-8 border-b border-[#3c3c3c]/50 text-[#828a9c] gap-6
       "
     >
