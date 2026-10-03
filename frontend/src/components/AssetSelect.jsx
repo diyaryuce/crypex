@@ -36,7 +36,7 @@ export default function AssetSelect({ value, onChange }) {
 
         <ChevronDown
           className={`
-            ml-auto transition-transform duration-200
+            ml-auto transition-transform duration-200 text-[#858b97]
 
             ${open ? "rotate-180" : ""}
           `}

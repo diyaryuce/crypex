@@ -12,7 +12,7 @@ export default function Sidebar() {
   return (
     <aside
       className="
-        h-screen w-[15%] sticky top-0 overflow-hidden bg-[#171717] flex flex-col p-4 pt-8
+        h-screen w-[15%] sticky top-0 overflow-hidden bg-[#141515] flex flex-col p-4 pt-8
         border-r border-[#3c3c3c]/50 shrink-0
       "
     >

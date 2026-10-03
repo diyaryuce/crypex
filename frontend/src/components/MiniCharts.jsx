@@ -27,3 +27,108 @@ export default function MiniChart({ className, data }) {
     </div>
   );
 }
+
+export const portfolioData = [
+  { price: 62000 },
+  { price: 62500 },
+  { price: 62100 },
+  { price: 63200 },
+  { price: 62900 },
+  { price: 64100 },
+  { price: 65000 },
+];
+
+export const chartData = {
+  BTC: [
+    { price: 62000 },
+    { price: 63500 },
+    { price: 64200 },
+    { price: 63800 },
+    { price: 63100 },
+    { price: 62900 },
+    { price: 64100 },
+    { price: 65000 },
+    { price: 64600 },
+    { price: 65400 },
+    { price: 64800 },
+    { price: 63900 },
+  ],
+
+  ETH: [
+    { price: 2500 },
+    { price: 2460 },
+    { price: 2380 },
+    { price: 2320 },
+    { price: 2350 },
+    { price: 2440 },
+    { price: 2480 },
+    { price: 2450 },
+    { price: 2510 },
+    { price: 2550 },
+    { price: 2490 },
+  ],
+
+  USD: [
+    { price: 100 },
+    { price: 100.1 },
+    { price: 99.9 },
+    { price: 100.05 },
+    { price: 100 },
+    { price: 100.08 },
+    { price: 99.98 },
+  ],
+};
+
+export const cryptoChartData = {
+  BTC: [
+    { price: 22 },
+    { price: 28 },
+    { price: 24 },
+    { price: 31 },
+    { price: 29 },
+    { price: 35 },
+    { price: 42 },
+    { price: 39 },
+    { price: 44 },
+    { price: 48 },
+  ],
+
+  ETH: [
+    { price: 18 },
+    { price: 23 },
+    { price: 20 },
+    { price: 27 },
+    { price: 25 },
+    { price: 30 },
+    { price: 34 },
+    { price: 32 },
+    { price: 36 },
+    { price: 33 },
+  ],
+
+  SOL: [
+    { price: 14 },
+    { price: 19 },
+    { price: 17 },
+    { price: 22 },
+    { price: 21 },
+    { price: 26 },
+    { price: 29 },
+    { price: 27 },
+    { price: 31 },
+    { price: 30 },
+  ],
+
+  BNB: [
+    { price: 20 },
+    { price: 26 },
+    { price: 23 },
+    { price: 29 },
+    { price: 28 },
+    { price: 34 },
+    { price: 38 },
+    { price: 36 },
+    { price: 41 },
+    { price: 45 },
+  ],
+};

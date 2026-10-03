@@ -1,32 +1,26 @@
 import { useEffect, useState } from "react";
-import { ArrowUpRight, ChevronRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { getWallets, getTransactions } from "../services/api";
+
 import TradeForm from "../components/TradeForm";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import MiniChart from "../components/MiniCharts";
+import MiniChart, { portfolioData } from "../components/MiniCharts";
 import DateButtons from "../components/DateButtons";
 import TransactionList from "../components/TransactionList";
 import WalletCards from "../components/WalletCards";
+import MarketPrices from "../components/MarketPrices";
 
 export default function Dashboard({ user }) {
   const [wallets, setWallets] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState("");
 
-  const portfolioData = [
-    { price: 62000 },
-    { price: 62500 },
-    { price: 62100 },
-    { price: 63200 },
-    { price: 62900 },
-    { price: 64100 },
-    { price: 65000 },
-  ];
-
   const prices = {
     BTC: 60000,
     ETH: 2500,
+    SOL: 158,
+    BNB: 600,
   };
 
   const assetInfo = {
@@ -84,8 +78,8 @@ export default function Dashboard({ user }) {
       >
         <Header user={user} />
 
-        <div className="p-6">
-          <h1 className="text-4xl font-semibold">Dashboard</h1>
+        <div className="px-6 py-4 bg-[#101011]">
+          <h1 className="text-4xl">Dashboard</h1>
           <p className="text-[#858b97] mt-1 mb-4">
             Overview of your portfolio, wallets and recent activity
           </p>
@@ -93,7 +87,7 @@ export default function Dashboard({ user }) {
           {error && <p>{error}</p>}
 
           <section className="flex gap-4">
-            <div className="rounded-3xl px-6 py-10 border border-[#3c3c3c]/50 w-[60%] flex">
+            <div className="rounded-3xl px-7 py-4 border border-[#3c3c3c]/50 bg-[#151515] w-[58%] flex">
               <div className="flex flex-col gap-2 mt-4">
                 <h2 className="text-[#858b97] text-lg">Portfolio Value</h2>
                 <h1 className="text-[2.75rem]">${portfolioValue.toFixed(2)}</h1>
@@ -112,7 +106,7 @@ export default function Dashboard({ user }) {
               </div>
             </div>
 
-            <TradeForm onTrade={loadDashboard} />
+            <TradeForm onTrade={loadDashboard} prices={prices} />
           </section>
 
           <WalletCards
@@ -121,7 +115,15 @@ export default function Dashboard({ user }) {
             prices={prices}
           />
 
-          <TransactionList transactions={transactions} assetInfo={assetInfo} />
+          <div className="flex gap-4">
+            <TransactionList
+              transactions={transactions}
+              assetInfo={assetInfo}
+              prices={prices}
+            />
+
+            <MarketPrices prices={prices} />
+          </div>
         </div>
       </main>
     </div>
