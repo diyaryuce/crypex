@@ -21,22 +21,14 @@ export default function MiniChart({ className, data }) {
             strokeWidth={2}
             fill="url(#chartGradient)"
             dot={false}
+            animationDuration={400}
+            animationEasing="ease-out"
           />
         </AreaChart>
       </ResponsiveContainer>
     </div>
   );
 }
-
-export const portfolioData = [
-  { price: 62000 },
-  { price: 62500 },
-  { price: 62100 },
-  { price: 63200 },
-  { price: 62900 },
-  { price: 64100 },
-  { price: 65000 },
-];
 
 export const chartData = {
   BTC: [

@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { getWallets, getTransactions } from "../services/api";
+import {
+  getWallets,
+  getTransactions,
+  getMarketPrices,
+  getMarketHistory,
+} from "../services/api";
 
 import TradeForm from "../components/TradeForm";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import MiniChart, { portfolioData } from "../components/MiniCharts";
+import MiniChart from "../components/MiniCharts";
 import DateButtons from "../components/DateButtons";
 import TransactionList from "../components/TransactionList";
 import WalletCards from "../components/WalletCards";
@@ -14,13 +19,23 @@ import MarketPrices from "../components/MarketPrices";
 export default function Dashboard({ user }) {
   const [wallets, setWallets] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [marketPrices, setMarketPrices] = useState([]);
+  const [selectedRange, setSelectedRange] = useState("1D");
+  const [portfolioData, setPortfolioData] = useState([]);
+
   const [error, setError] = useState("");
+  const [historyError, setHistoryError] = useState("");
 
   const prices = {
-    BTC: 60000,
-    ETH: 2500,
+    BTC: marketPrices?.BTC?.price ?? 0,
+    ETH: marketPrices?.ETH?.price ?? 0,
     SOL: 158,
     BNB: 600,
+  };
+
+  const changes = {
+    BTC: marketPrices?.BTC?.change24h ?? 0,
+    ETH: marketPrices?.ETH?.change24h ?? 0,
   };
 
   const assetInfo = {
@@ -48,15 +63,29 @@ export default function Dashboard({ user }) {
     return total + balance * (prices[wallet.asset] ?? 0);
   }, 0);
 
-  async function loadDashboard() {
+  async function loadPortfolioHistory(range) {
     try {
-      setError("");
+      setHistoryError("");
 
+      const data = await getMarketHistory("BTC", range);
+
+      setPortfolioData(data);
+    } catch (error) {
+      setHistoryError(error.message);
+    }
+  }
+
+  async function loadDashboard() {
+    setError("");
+
+    try {
       const walletData = await getWallets();
       const transactionData = await getTransactions();
+      const marketData = await getMarketPrices();
 
       setWallets(walletData);
       setTransactions(transactionData);
+      setMarketPrices(marketData);
     } catch (error) {
       setError(error.message);
     }
@@ -64,6 +93,7 @@ export default function Dashboard({ user }) {
 
   useEffect(() => {
     loadDashboard();
+    loadPortfolioHistory(selectedRange);
   }, []);
 
   return (
@@ -79,12 +109,17 @@ export default function Dashboard({ user }) {
         <Header user={user} />
 
         <div className="px-6 py-4 bg-[#101011]">
-          <h1 className="text-4xl">Dashboard</h1>
-          <p className="text-[#858b97] mt-1 mb-4">
-            Overview of your portfolio, wallets and recent activity
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl">Dashboard</h1>
+              <p className="text-[#858b97] mt-1 mb-4">
+                Overview of your portfolio, wallets and recent activity
+              </p>
+            </div>
 
-          {error && <p>{error}</p>}
+            {error && <p className="text-red-500">{error}</p>}
+            {historyError && <p className="text-red-500">{historyError}</p>}
+          </div>
 
           <section className="flex gap-4">
             <div className="rounded-3xl px-7 py-4 border border-[#3c3c3c]/50 bg-[#151515] w-[58%] flex">
@@ -100,9 +135,15 @@ export default function Dashboard({ user }) {
               </div>
 
               <div className="flex flex-col ml-auto gap-8">
-                <DateButtons />
+                <DateButtons
+                  selected={selectedRange}
+                  onChange={(range) => {
+                    setSelectedRange(range);
+                    loadPortfolioHistory(range);
+                  }}
+                />
 
-                <MiniChart data={portfolioData} className="w-130 h-30" />
+                <MiniChart data={portfolioData} className="w-125 h-30" />
               </div>
             </div>
 
@@ -122,7 +163,7 @@ export default function Dashboard({ user }) {
               prices={prices}
             />
 
-            <MarketPrices prices={prices} />
+            <MarketPrices prices={prices} changes={changes} />
           </div>
         </div>
       </main>

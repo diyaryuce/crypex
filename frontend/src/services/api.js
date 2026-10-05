@@ -98,3 +98,25 @@ export async function sellCrypto(asset, amount) {
 
   return data;
 }
+
+export async function getMarketPrices() {
+  const response = await fetch("http://localhost:3000/api/market/prices");
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch market prices");
+  }
+
+  return response.json();
+}
+
+export async function getMarketHistory(asset, range) {
+  const response = await fetch(
+    `http://localhost:3000/api/market/history/${asset}?range=${range}`,
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch market history");
+  }
+
+  return response.json();
+}

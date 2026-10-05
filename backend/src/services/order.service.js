@@ -1,9 +1,17 @@
 const { Prisma } = require("@prisma/client");
 const prisma = require("../lib/prisma");
-const prices = require("../config/prices");
+const { getMarketPrices } = require("./market.services");
 
 async function buyCrypto(userId, asset, amount) {
-  const price = new Prisma.Decimal(prices[asset]);
+  const marketPrices = await getMarketPrices();
+
+  const currentPrice = marketPrices[asset]?.price;
+
+  if (!currentPrice) {
+    throw new Error("Unsupported asset");
+  }
+
+  const price = new Prisma.Decimal(currentPrice);
   const amountDecimal = new Prisma.Decimal(amount);
   const totalCost = price.mul(amountDecimal);
 
@@ -77,7 +85,15 @@ async function buyCrypto(userId, asset, amount) {
 }
 
 async function sellCrypto(userId, asset, amount) {
-  const price = new Prisma.Decimal(prices[asset]);
+  const marketPrices = await getMarketPrices();
+
+  const currentPrice = marketPrices[asset]?.price;
+
+  if (!currentPrice) {
+    throw new Error("Unsupported asset");
+  }
+
+  const price = new Prisma.Decimal(currentPrice);
   const amountDecimal = new Prisma.Decimal(amount);
   const totalValue = price.mul(amountDecimal);
 

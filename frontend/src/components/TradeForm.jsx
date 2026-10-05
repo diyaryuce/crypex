@@ -31,7 +31,7 @@ export default function TradeForm({ onTrade, prices }) {
   const estimatedTotal = Number(amount || 0) * (prices[asset] ?? 0);
 
   return (
-    <section className="rounded-3xl px-8 py-4 border border-[#3c3c3c]/50 w-full bg-[#151515]">
+    <section className="rounded-3xl px-8 py-4 border border-[#3c3c3c]/50 w-[42%] bg-[#151515]">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl">Quick Trade</h2>
 

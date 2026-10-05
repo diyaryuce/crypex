@@ -1,30 +1,30 @@
 import MiniChart, { cryptoChartData } from "../components/MiniCharts";
 
-export default function MarketPrices({ prices }) {
+export default function MarketPrices({ prices, changes }) {
   const marketData = [
     {
       symbol: "BTC",
       image: "/img/btc.png",
       price: prices.BTC,
-      change: "+3.4%",
+      change: changes.BTC,
     },
     {
       symbol: "ETH",
       image: "/img/eth.png",
       price: prices.ETH,
-      change: "+2.1%",
+      change: changes.ETH,
     },
     {
       symbol: "SOL",
       image: "/img/sol.png",
       price: prices.SOL,
-      change: "+1.8%",
+      change: "1.8",
     },
     {
       symbol: "BNB",
       image: "/img/bnb.png",
       price: prices.BNB,
-      change: "+0.9%",
+      change: "0.9",
     },
   ];
 
@@ -76,7 +76,25 @@ export default function MarketPrices({ prices }) {
             })}
           </span>
 
-          <span className="text-emerald-500">{coin.change}</span>
+          {coin.change > 0 ? (
+            <span className="text-emerald-500">
+              <span>+</span>
+              {coin.change.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+              <span>%</span>
+            </span>
+          ) : (
+            <span className="text-red-500">
+              <span>-</span>
+              {coin.change.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+              <span>%</span>
+            </span>
+          )}
 
           <MiniChart
             data={cryptoChartData[coin.symbol]}

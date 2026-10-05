@@ -7,6 +7,7 @@ const userRoutes = require("./routes/user.routes");
 const walletRoutes = require("./routes/wallet.routes");
 const transactionRoutes = require("./routes/transaction.routes");
 const orderRoutes = require("./routes/order.routes");
+const marketRoutes = require("./routes/market.routes");
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/wallets", walletRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/market", marketRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({
