@@ -73,7 +73,7 @@ export default function TransactionList({ transactions, assetInfo, prices }) {
             <span>
               {transaction.total
                 ? `$${Number(transaction.total).toFixed(2)}`
-                : "-"}
+                : `$${Number(transaction.amount).toFixed(2)}`}
             </span>
 
             <span className="text-[#858b97]">

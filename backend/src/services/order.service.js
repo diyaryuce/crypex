@@ -58,7 +58,9 @@ async function buyCrypto(userId, asset, amount) {
         userId,
         type: "BUY",
         asset,
-        amount,
+        amount: amountDecimal,
+        price,
+        total: totalCost,
       },
     });
 
@@ -130,7 +132,9 @@ async function sellCrypto(userId, asset, amount) {
         userId,
         type: "SELL",
         asset,
-        amount,
+        amount: amountDecimal,
+        price,
+        total: totalValue,
       },
     });
 

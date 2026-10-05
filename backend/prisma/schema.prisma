@@ -40,7 +40,11 @@ model Transaction {
   type      String
   asset     String
   amount    Decimal  @db.Decimal(30, 10)
+
+  price     Decimal? @db.Decimal(30, 10)
+  total     Decimal? @db.Decimal(30, 10)
+
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
