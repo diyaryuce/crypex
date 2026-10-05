@@ -1,6 +1,6 @@
 import MiniChart, { cryptoChartData } from "../components/MiniCharts";
 
-export default function MarketPrices({ prices, changes }) {
+export default function MarketPrices({ prices, changes, historyData }) {
   const marketData = [
     {
       symbol: "BTC",
@@ -97,7 +97,11 @@ export default function MarketPrices({ prices, changes }) {
           )}
 
           <MiniChart
-            data={cryptoChartData[coin.symbol]}
+            data={
+              ["BTC", "ETH"].includes(coin.symbol)
+                ? (historyData[coin.symbol] ?? [])
+                : cryptoChartData[coin.symbol]
+            }
             className="h-10 w-30 mx-auto"
           />
         </div>

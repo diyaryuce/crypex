@@ -1,7 +1,20 @@
 import { ArrowUpRight, ChevronRight } from "lucide-react";
 import MiniChart, { chartData } from "./MiniCharts";
 
-export default function WalletCards({ wallets, assetInfo, prices }) {
+export default function WalletCards({
+  wallets,
+  assetInfo,
+  prices,
+  historyData,
+}) {
+  const usdHistory = [
+    { price: 1 },
+    { price: 1 },
+    { price: 1 },
+    { price: 1 },
+    { price: 1 },
+  ];
+
   return (
     <section className="flex gap-6">
       {wallets.map((wallet) => {
@@ -52,7 +65,11 @@ export default function WalletCards({ wallets, assetInfo, prices }) {
             </div>
 
             <MiniChart
-              data={chartData[wallet.asset]}
+              data={
+                wallet.asset === "USD"
+                  ? chartData.USD
+                  : (historyData[wallet.asset] ?? [])
+              }
               className="h-20 w-60 mx-auto"
             />
 

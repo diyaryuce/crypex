@@ -22,6 +22,12 @@ export default function Dashboard({ user }) {
   const [marketPrices, setMarketPrices] = useState([]);
   const [selectedRange, setSelectedRange] = useState("1D");
   const [portfolioData, setPortfolioData] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const [walletHistory, setWalletHistory] = useState({
+    BTC: [],
+    ETH: [],
+  });
 
   const [error, setError] = useState("");
   const [historyError, setHistoryError] = useState("");
@@ -63,38 +69,98 @@ export default function Dashboard({ user }) {
     return total + balance * (prices[wallet.asset] ?? 0);
   }, 0);
 
-  async function loadPortfolioHistory(range) {
-    try {
-      setHistoryError("");
-
-      const data = await getMarketHistory("BTC", range);
-
-      setPortfolioData(data);
-    } catch (error) {
-      setHistoryError(error.message);
-    }
-  }
-
   async function loadDashboard() {
     setError("");
 
     try {
-      const walletData = await getWallets();
-      const transactionData = await getTransactions();
-      const marketData = await getMarketPrices();
+      const [walletData, transactionData] = await Promise.all([
+        getWallets(),
+        getTransactions(),
+      ]);
 
       setWallets(walletData);
       setTransactions(transactionData);
-      setMarketPrices(marketData);
     } catch (error) {
       setError(error.message);
+    }
+
+    try {
+      const marketData = await getMarketPrices();
+      setMarketPrices(marketData);
+    } catch (error) {
+      console.error("Failed to fetch market prices:", error);
+    }
+  }
+
+  async function loadPortfolioHistory(range) {
+    if (historyLoading) return;
+
+    try {
+      setHistoryLoading(true);
+      setHistoryError("");
+
+      const btcHistory = await getMarketHistory("BTC", range);
+      const ethHistory = await getMarketHistory("ETH", range);
+
+      const usdBalance = Number(
+        wallets.find((wallet) => wallet.asset === "USD")?.balance ?? 0,
+      );
+
+      const btcBalance = Number(
+        wallets.find((wallet) => wallet.asset === "BTC")?.balance ?? 0,
+      );
+
+      const ethBalance = Number(
+        wallets.find((wallet) => wallet.asset === "ETH")?.balance ?? 0,
+      );
+
+      const length = Math.min(btcHistory.length, ethHistory.length);
+
+      const data = Array.from({ length }, (_, index) => {
+        const btcPrice = btcHistory[index].price;
+        const ethPrice = ethHistory[index].price;
+
+        return {
+          timestamp: btcHistory[index].timestamp,
+
+          price: usdBalance + btcBalance * btcPrice + ethBalance * ethPrice,
+        };
+      });
+
+      setPortfolioData(data);
+    } catch (error) {
+      setHistoryError(error.message);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }
+
+  async function loadWalletHistory() {
+    try {
+      const [btcHistory, ethHistory] = await Promise.all([
+        getMarketHistory("BTC", "1D"),
+        getMarketHistory("ETH", "1D"),
+      ]);
+
+      setWalletHistory({
+        BTC: btcHistory,
+        ETH: ethHistory,
+      });
+    } catch (error) {
+      console.error("Failed to fetch wallet history:", error);
     }
   }
 
   useEffect(() => {
     loadDashboard();
-    loadPortfolioHistory(selectedRange);
+    loadWalletHistory();
   }, []);
+
+  useEffect(() => {
+    if (wallets.length === 0) return;
+
+    loadPortfolioHistory(selectedRange);
+  }, [wallets, selectedRange]);
 
   return (
     <div className="flex min-h-screen bg-[#151515] w-full min-w-0 overflow-x-clip text-white">
@@ -138,8 +204,9 @@ export default function Dashboard({ user }) {
                 <DateButtons
                   selected={selectedRange}
                   onChange={(range) => {
-                    setSelectedRange(range);
-                    loadPortfolioHistory(range);
+                    if (!historyLoading) {
+                      setSelectedRange(range);
+                    }
                   }}
                 />
 
@@ -154,6 +221,7 @@ export default function Dashboard({ user }) {
             wallets={wallets}
             assetInfo={assetInfo}
             prices={prices}
+            historyData={walletHistory}
           />
 
           <div className="flex gap-4">
@@ -163,7 +231,11 @@ export default function Dashboard({ user }) {
               prices={prices}
             />
 
-            <MarketPrices prices={prices} changes={changes} />
+            <MarketPrices
+              prices={prices}
+              changes={changes}
+              historyData={walletHistory}
+            />
           </div>
         </div>
       </main>

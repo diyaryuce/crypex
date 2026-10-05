@@ -1,10 +1,12 @@
 let cachedPrices = null;
 let lastFetchedAt = 0;
+let priceRequest = null;
 
 const historyCache = new Map();
+const historyRequests = new Map();
 
 const CACHE_DURATION = 30_000;
-const HISTORY_CACHE_DURATION = 60_000;
+const HISTORY_CACHE_DURATION = 5 * 60 * 1000;
 
 async function getMarketPrices() {
   const now = Date.now();
@@ -13,34 +15,46 @@ async function getMarketPrices() {
     return cachedPrices;
   }
 
-  const response = await fetch(
-    "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true",
-  );
-
-  if (!response.ok) {
-    const errorBody = await response.text();
-
-    console.error("CoinGecko error:", response.status, errorBody);
-
-    throw new Error("Failed to fetch market prices");
+  if (priceRequest) {
+    return priceRequest;
   }
 
-  const data = await response.json();
+  priceRequest = (async () => {
+    try {
+      const response = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true",
+      );
 
-  cachedPrices = {
-    BTC: {
-      price: data.bitcoin.usd,
-      change24h: data.bitcoin.usd_24h_change,
-    },
-    ETH: {
-      price: data.ethereum.usd,
-      change24h: data.ethereum.usd_24h_change,
-    },
-  };
+      if (!response.ok) {
+        const errorBody = await response.text();
 
-  lastFetchedAt = now;
+        console.error("CoinGecko error:", response.status, errorBody);
 
-  return cachedPrices;
+        throw new Error("Failed to fetch market prices");
+      }
+
+      const data = await response.json();
+
+      cachedPrices = {
+        BTC: {
+          price: data.bitcoin.usd,
+          change24h: data.bitcoin.usd_24h_change,
+        },
+        ETH: {
+          price: data.ethereum.usd,
+          change24h: data.ethereum.usd_24h_change,
+        },
+      };
+
+      lastFetchedAt = now;
+
+      return cachedPrices;
+    } finally {
+      priceRequest = null;
+    }
+  })();
+
+  return priceRequest;
 }
 
 const coinIds = {
@@ -71,40 +85,55 @@ async function getMarketHistory(asset, range) {
   }
 
   const cacheKey = `${normalizedAsset}-${normalizedRange}`;
+  const now = Date.now();
 
   const cached = historyCache.get(cacheKey);
 
-  if (cached && Date.now() - cached.fetchedAt < HISTORY_CACHE_DURATION) {
+  if (cached && now - cached.fetchedAt < HISTORY_CACHE_DURATION) {
     return cached.data;
   }
 
-  const response = await fetch(
-    `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`,
-  );
-
-  if (!response.ok) {
-    const errorBody = await response.text();
-
-    console.error("CoinGecko history error:", response.status, errorBody);
-
-    throw new Error(
-      `CoinGecko history request failed with status ${response.status}`,
-    );
+  if (historyRequests.has(cacheKey)) {
+    return historyRequests.get(cacheKey);
   }
 
-  const data = await response.json();
+  const request = (async () => {
+    try {
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`,
+      );
 
-  const history = data.prices.map(([timestamp, price]) => ({
-    timestamp,
-    price,
-  }));
+      if (!response.ok) {
+        const errorBody = await response.text();
 
-  historyCache.set(cacheKey, {
-    data: history,
-    fetchedAt: Date.now(),
-  });
+        console.error("CoinGecko history error:", response.status, errorBody);
 
-  return history;
+        throw new Error(
+          `CoinGecko history request failed with status ${response.status}`,
+        );
+      }
+
+      const data = await response.json();
+
+      const history = data.prices.map(([timestamp, price]) => ({
+        timestamp,
+        price,
+      }));
+
+      historyCache.set(cacheKey, {
+        data: history,
+        fetchedAt: Date.now(),
+      });
+
+      return history;
+    } finally {
+      historyRequests.delete(cacheKey);
+    }
+  })();
+
+  historyRequests.set(cacheKey, request);
+
+  return request;
 }
 
 module.exports = {
