@@ -109,7 +109,7 @@ export default function TradeForm({ onTrade, prices }) {
         className="
           gap-1 flex w-full justify-center items-center font-semibold h-11 mt-1 rounded-xl text-lg
           bg-[radial-gradient(50.42%_92.5%_at_50.42%_7.5%,#6EE7B7_0%,#047857_100%)] text-black
-          transition duration-300 hover:scale-[1.05]
+          transition duration-300 hover:scale-[1.03]
         "
       >
         <span>{tradeType}</span>

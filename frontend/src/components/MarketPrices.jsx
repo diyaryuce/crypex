@@ -1,4 +1,4 @@
-import MiniChart, { cryptoChartData } from "../components/MiniCharts";
+import MiniChart from "../components/MiniCharts";
 
 export default function MarketPrices({ prices, changes, historyData }) {
   const marketData = [
@@ -18,13 +18,13 @@ export default function MarketPrices({ prices, changes, historyData }) {
       symbol: "SOL",
       image: "/img/sol.png",
       price: prices.SOL,
-      change: "1.8",
+      change: changes.SOL,
     },
     {
       symbol: "BNB",
       image: "/img/bnb.png",
       price: prices.BNB,
-      change: "0.9",
+      change: changes.BNB,
     },
   ];
 
@@ -87,7 +87,6 @@ export default function MarketPrices({ prices, changes, historyData }) {
             </span>
           ) : (
             <span className="text-red-500">
-              <span>-</span>
               {coin.change.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
@@ -97,11 +96,8 @@ export default function MarketPrices({ prices, changes, historyData }) {
           )}
 
           <MiniChart
-            data={
-              ["BTC", "ETH"].includes(coin.symbol)
-                ? (historyData[coin.symbol] ?? [])
-                : cryptoChartData[coin.symbol]
-            }
+            data={historyData[coin.symbol] ?? []}
+            colour={coin.change > 0 ? "#34d399" : "#ef4444"}
             className="h-10 w-30 mx-auto"
           />
         </div>

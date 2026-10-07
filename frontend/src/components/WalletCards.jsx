@@ -1,20 +1,13 @@
-import { ArrowUpRight, ChevronRight } from "lucide-react";
-import MiniChart, { chartData } from "./MiniCharts";
+import { ArrowDownRight, ArrowUpRight, ChevronRight } from "lucide-react";
+import MiniChart from "./MiniCharts";
 
 export default function WalletCards({
   wallets,
   assetInfo,
   prices,
   historyData,
+  changes,
 }) {
-  const usdHistory = [
-    { price: 1 },
-    { price: 1 },
-    { price: 1 },
-    { price: 1 },
-    { price: 1 },
-  ];
-
   return (
     <section className="flex gap-6">
       {wallets.map((wallet) => {
@@ -28,13 +21,20 @@ export default function WalletCards({
         return (
           <button
             key={wallet.id}
-            className="
-                    flex-1 group flex items-center rounded-2xl mt-4
-                    border border-[#3c3c3c]/50 px-6 py-4 relative
+            className={`
+                    group flex items-center rounded-2xl mt-4
+                    border border-[#3c3c3c]/50 px-8 py-4 relative
                     hover:scale-[1.02] transition duration-200 bg-[#151515]
-                  "
+
+                    ${wallet.asset === "USD" ? "w-[20%] justify-center" : "flex-1"}
+                  `}
           >
-            <div className="flex flex-col items-start">
+            <div
+              className={`
+                flex flex-col
+                ${wallet.asset === "USD" ? "items-center" : "items-start"}
+              `}
+            >
               <div className="flex items-center gap-3">
                 <img
                   src={info?.image}
@@ -48,30 +48,59 @@ export default function WalletCards({
                 </div>
               </div>
 
-              <p className="mt-3 text-2xl font-medium max-w-md">
+              <p className="mt-3 text-2xl justify-center font-medium max-w-md">
                 {wallet.asset !== "USD"
                   ? `${wallet.balance} ${wallet.asset}`
-                  : `$${wallet.balance}`}
+                  : `$${Number(wallet.balance).toFixed(2)}`}
               </p>
 
               {wallet.asset !== "USD" && (
                 <p className="text-[#858b97]">≈ ${usdValue.toFixed(2)}</p>
               )}
 
-              <div className="flex mt-2 gap-2 text-emerald-500">
-                <ArrowUpRight />
-                <span>+2.31%</span>
-              </div>
+              {wallet.asset !== "USD" && (
+                <div className="flex mt-2 gap-2">
+                  {changes?.[wallet.asset] >= 0 ? (
+                    <ArrowUpRight className="text-emerald-500" />
+                  ) : (
+                    <ArrowDownRight className="text-red-500" />
+                  )}
+
+                  {changes?.[wallet.asset] >= 0 ? (
+                    <span className="text-emerald-500">
+                      <span>+</span>
+                      {Number(changes?.[wallet.asset] ?? 0).toLocaleString(
+                        undefined,
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        },
+                      )}
+                      <span>%</span>
+                    </span>
+                  ) : (
+                    <span className="text-red-500">
+                      {Number(changes?.[wallet.asset] ?? 0).toLocaleString(
+                        undefined,
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        },
+                      )}
+                      <span>%</span>
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
-            <MiniChart
-              data={
-                wallet.asset === "USD"
-                  ? chartData.USD
-                  : (historyData[wallet.asset] ?? [])
-              }
-              className="h-20 w-60 mx-auto"
-            />
+            {wallet.asset !== "USD" && (
+              <MiniChart
+                data={historyData[wallet.asset] ?? []}
+                className="h-30 w-70 mx-auto"
+                colour={changes?.[wallet.asset] >= 0 ? "#34d399" : "#ef4444"}
+              />
+            )}
 
             <ChevronRight className="absolute top-6 right-6 text-[#858b97] transition duration-200 group-hover:translate-x-2" />
           </button>

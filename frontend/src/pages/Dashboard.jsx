@@ -20,14 +20,18 @@ export default function Dashboard({ user }) {
   const [wallets, setWallets] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [marketPrices, setMarketPrices] = useState([]);
+
   const [selectedRange, setSelectedRange] = useState("1D");
   const [portfolioData, setPortfolioData] = useState([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
 
-  const [walletHistory, setWalletHistory] = useState({
+  const [miniChartHistory, setMiniChartHistory] = useState({
     BTC: [],
     ETH: [],
+    SOL: [],
+    BNB: [],
   });
+
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const [error, setError] = useState("");
   const [historyError, setHistoryError] = useState("");
@@ -35,13 +39,15 @@ export default function Dashboard({ user }) {
   const prices = {
     BTC: marketPrices?.BTC?.price ?? 0,
     ETH: marketPrices?.ETH?.price ?? 0,
-    SOL: 158,
-    BNB: 600,
+    SOL: marketPrices?.SOL?.price ?? 0,
+    BNB: marketPrices?.BNB?.price ?? 0,
   };
 
   const changes = {
     BTC: marketPrices?.BTC?.change24h ?? 0,
     ETH: marketPrices?.ETH?.change24h ?? 0,
+    SOL: marketPrices?.SOL?.change24h ?? 0,
+    BNB: marketPrices?.BNB?.change24h ?? 0,
   };
 
   const assetInfo = {
@@ -69,6 +75,14 @@ export default function Dashboard({ user }) {
     return total + balance * (prices[wallet.asset] ?? 0);
   }, 0);
 
+  const portfolioStartValue = portfolioData[0]?.price ?? 0;
+  const portfolioEndValue = portfolioData[portfolioData.length - 1]?.price ?? 0;
+
+  const portfolioChange = portfolioEndValue - portfolioStartValue;
+
+  const portfolioChangePercent =
+    portfolioStartValue > 0 ? (portfolioChange / portfolioStartValue) * 100 : 0;
+
   async function loadDashboard() {
     setError("");
 
@@ -89,6 +103,27 @@ export default function Dashboard({ user }) {
       setMarketPrices(marketData);
     } catch (error) {
       console.error("Failed to fetch market prices:", error);
+    }
+  }
+
+  async function loadMiniChartHistory() {
+    try {
+      const [btcHistory, ethHistory, solHistory, bnbHistory] =
+        await Promise.all([
+          getMarketHistory("BTC", "1D"),
+          getMarketHistory("ETH", "1D"),
+          getMarketHistory("SOL", "1D"),
+          getMarketHistory("BNB", "1D"),
+        ]);
+
+      setMiniChartHistory({
+        BTC: btcHistory,
+        ETH: ethHistory,
+        SOL: solHistory,
+        BNB: bnbHistory,
+      });
+    } catch (error) {
+      console.error("Failed to fetch mini chart history:", error);
     }
   }
 
@@ -116,16 +151,14 @@ export default function Dashboard({ user }) {
 
       const length = Math.min(btcHistory.length, ethHistory.length);
 
-      const data = Array.from({ length }, (_, index) => {
-        const btcPrice = btcHistory[index].price;
-        const ethPrice = ethHistory[index].price;
+      const data = Array.from({ length }, (_, index) => ({
+        timestamp: btcHistory[index].timestamp,
 
-        return {
-          timestamp: btcHistory[index].timestamp,
-
-          price: usdBalance + btcBalance * btcPrice + ethBalance * ethPrice,
-        };
-      });
+        price:
+          usdBalance +
+          btcBalance * btcHistory[index].price +
+          ethBalance * ethHistory[index].price,
+      }));
 
       setPortfolioData(data);
     } catch (error) {
@@ -135,25 +168,9 @@ export default function Dashboard({ user }) {
     }
   }
 
-  async function loadWalletHistory() {
-    try {
-      const [btcHistory, ethHistory] = await Promise.all([
-        getMarketHistory("BTC", "1D"),
-        getMarketHistory("ETH", "1D"),
-      ]);
-
-      setWalletHistory({
-        BTC: btcHistory,
-        ETH: ethHistory,
-      });
-    } catch (error) {
-      console.error("Failed to fetch wallet history:", error);
-    }
-  }
-
   useEffect(() => {
     loadDashboard();
-    loadWalletHistory();
+    loadMiniChartHistory();
   }, []);
 
   useEffect(() => {
@@ -193,10 +210,24 @@ export default function Dashboard({ user }) {
                 <h2 className="text-[#858b97] text-lg">Portfolio Value</h2>
                 <h1 className="text-[2.75rem]">${portfolioValue.toFixed(2)}</h1>
 
-                <div className="flex gap-2 text-emerald-500">
-                  <ArrowUpRight />
-                  <span>+2.31%</span>
-                  <span>(+$280.32)</span>
+                <div
+                  className={`flex gap-2 ${
+                    portfolioChange >= 0 ? "text-emerald-500" : "text-red-500"
+                  }`}
+                >
+                  <ArrowUpRight
+                    className={`transition duration-300 ${portfolioChange >= 0 ? "" : "rotate-90"}`}
+                  />
+
+                  <span>
+                    {portfolioChange >= 0 ? "+" : ""}
+                    {portfolioChangePercent.toFixed(2)}%
+                  </span>
+
+                  <span>
+                    ({portfolioChange >= 0 ? "+" : "-"}$
+                    {Math.abs(portfolioChange).toFixed(2)})
+                  </span>
                 </div>
               </div>
 
@@ -210,7 +241,11 @@ export default function Dashboard({ user }) {
                   }}
                 />
 
-                <MiniChart data={portfolioData} className="w-125 h-30" />
+                <MiniChart
+                  data={portfolioData}
+                  className="w-125 h-30"
+                  colour={portfolioChange >= 0 ? "#34d399" : "#ef4444"}
+                />
               </div>
             </div>
 
@@ -221,7 +256,8 @@ export default function Dashboard({ user }) {
             wallets={wallets}
             assetInfo={assetInfo}
             prices={prices}
-            historyData={walletHistory}
+            historyData={miniChartHistory}
+            changes={changes}
           />
 
           <div className="flex gap-4">
@@ -234,7 +270,7 @@ export default function Dashboard({ user }) {
             <MarketPrices
               prices={prices}
               changes={changes}
-              historyData={walletHistory}
+              historyData={miniChartHistory}
             />
           </div>
         </div>

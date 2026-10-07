@@ -22,7 +22,7 @@ async function getMarketPrices() {
   priceRequest = (async () => {
     try {
       const response = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true",
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd&include_24hr_change=true",
       );
 
       if (!response.ok) {
@@ -44,6 +44,14 @@ async function getMarketPrices() {
           price: data.ethereum.usd,
           change24h: data.ethereum.usd_24h_change,
         },
+        SOL: {
+          price: data.solana.usd,
+          change24h: data.solana.usd_24h_change,
+        },
+        BNB: {
+          price: data.binancecoin.usd,
+          change24h: data.binancecoin.usd_24h_change,
+        },
       };
 
       lastFetchedAt = now;
@@ -60,6 +68,8 @@ async function getMarketPrices() {
 const coinIds = {
   BTC: "bitcoin",
   ETH: "ethereum",
+  SOL: "solana",
+  BNB: "binancecoin",
 };
 
 const rangeDays = {
