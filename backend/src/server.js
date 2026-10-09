@@ -8,6 +8,7 @@ const walletRoutes = require("./routes/wallet.routes");
 const transactionRoutes = require("./routes/transaction.routes");
 const orderRoutes = require("./routes/order.routes");
 const marketRoutes = require("./routes/market.routes");
+const portfolioRoutes = require("./routes/portfolio.routes");
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use("/api/wallets", walletRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/market", marketRoutes);
+app.use("/api/portfolio", portfolioRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({
@@ -33,5 +35,5 @@ app.get("/api/health", (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Server running on http://localhost:3000");
+  console.log(`Server running on http://localhost:${PORT}`);
 });

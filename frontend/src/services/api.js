@@ -100,7 +100,7 @@ export async function sellCrypto(asset, amount) {
 }
 
 export async function getMarketPrices() {
-  const response = await fetch("http://localhost:3000/api/market/prices");
+  const response = await fetch(`${API_URL}/market/prices`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch market prices");
@@ -111,7 +111,7 @@ export async function getMarketPrices() {
 
 export async function getMarketHistory(asset, range) {
   const response = await fetch(
-    `http://localhost:3000/api/market/history/${asset}?range=${range}`,
+    `${API_URL}/market/history/${asset}?range=${range}`,
   );
 
   if (!response.ok) {
@@ -119,4 +119,22 @@ export async function getMarketHistory(asset, range) {
   }
 
   return response.json();
+}
+
+export async function getPortfolioHistory(range) {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}/portfolio/history?range=${range}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to fetch portfolio history");
+  }
+
+  return data;
 }

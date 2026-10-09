@@ -5,6 +5,7 @@ import {
   getTransactions,
   getMarketPrices,
   getMarketHistory,
+  getPortfolioHistory,
 } from "../services/api";
 
 import TradeForm from "../components/TradeForm";
@@ -134,31 +135,7 @@ export default function Dashboard({ user }) {
       setHistoryLoading(true);
       setHistoryError("");
 
-      const btcHistory = await getMarketHistory("BTC", range);
-      const ethHistory = await getMarketHistory("ETH", range);
-
-      const usdBalance = Number(
-        wallets.find((wallet) => wallet.asset === "USD")?.balance ?? 0,
-      );
-
-      const btcBalance = Number(
-        wallets.find((wallet) => wallet.asset === "BTC")?.balance ?? 0,
-      );
-
-      const ethBalance = Number(
-        wallets.find((wallet) => wallet.asset === "ETH")?.balance ?? 0,
-      );
-
-      const length = Math.min(btcHistory.length, ethHistory.length);
-
-      const data = Array.from({ length }, (_, index) => ({
-        timestamp: btcHistory[index].timestamp,
-
-        price:
-          usdBalance +
-          btcBalance * btcHistory[index].price +
-          ethBalance * ethHistory[index].price,
-      }));
+      const data = await getPortfolioHistory(range);
 
       setPortfolioData(data);
     } catch (error) {

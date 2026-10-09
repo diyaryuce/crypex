@@ -25,7 +25,7 @@ export default function TransactionList({ transactions, assetInfo, prices }) {
         <span>Date</span>
       </div>
 
-      {transactions.slice(0, 5).map((transaction, prices) => {
+      {transactions.slice(0, 5).map((transaction) => {
         const info = assetInfo[transaction.asset];
 
         const price =
