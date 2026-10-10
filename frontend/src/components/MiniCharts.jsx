@@ -33,15 +33,3 @@ export default function MiniChart({ className, data, colour = "#34d399" }) {
     </div>
   );
 }
-
-export const chartData = {
-  USD: [
-    { price: 100 },
-    { price: 100.1 },
-    { price: 99.9 },
-    { price: 100.05 },
-    { price: 100 },
-    { price: 100.08 },
-    { price: 99.98 },
-  ],
-};

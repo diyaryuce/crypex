@@ -56,7 +56,7 @@ async function getPortfolioHistory(userId, range) {
 
     while (
       transactionIndex < transactions.length &&
-      new Date(transactions[transactionIndex].createdAt).getTime >
+      new Date(transactions[transactionIndex].createdAt).getTime() >
         point.timestamp
     ) {
       reverseTransaction(balances, transactions[transactionIndex]);
@@ -64,11 +64,11 @@ async function getPortfolioHistory(userId, range) {
       transactionIndex++;
     }
 
-    const bthPrice = point.price;
+    const btcPrice = point.price;
     const ethPrice = getEthPriceAt(point.timestamp);
 
     const portfolioValue =
-      balances.USD + balances.BTC * bthPrice + balances.ETH * ethPrice;
+      balances.USD + balances.BTC * btcPrice + balances.ETH * ethPrice;
 
     history.push({
       timestamp: point.timestamp,
